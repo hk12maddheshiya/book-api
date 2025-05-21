@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql", "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  books     Book[]   @relation("BooksAddedByUser")
+  reviews   Review[]
+  createdAt DateTime @default(now())
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  title     String
+  author    String
+  genre     String
+  addedById Int
+  addedBy   User     @relation("BooksAddedByUser", fields: [addedById], references: [id])
+  reviews   Review[]
+ 
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int    
+  comment   String?
+  userId    Int
+  bookId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  book      Book     @relation(fields: [bookId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId]) 
+}
